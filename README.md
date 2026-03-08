@@ -11,6 +11,51 @@ Mock EHR agent demo: corrupt a clean dataset, then use an auditor (Gemini) to fi
 ✅ **Enhanced CoVE Format**: Chain of Verification for comprehensive auditing  
 ✅ **5-Second API Delays**: Faster processing (reduced from 60 seconds)  
 ✅ **Python 3.9 Compatible**: Full compatibility with older Python versions  
+✅ **Production-Ready Architecture**: Modular, extensible, team-friendly structure  
+
+---
+
+## 🏗️ **Production-Ready Architecture**
+
+This project follows a modular, production-ready structure that can be easily extended and maintained by multiple developers.
+
+### **📁 Project Structure**
+
+```
+self_critique_author/
+├── 📁 src/self_critique_author/          # Main package
+│   ├── 📁 core/                          # Core business logic
+│   │   ├── auditor.py                    # LLM-based auditing
+│   │   ├── resolver.py                   # Data correction
+│   │   └── pipeline.py                    # Main orchestrator
+│   ├── 📁 verification/                  # Verification systems
+│   │   ├── whatsapp_verifier.py          # WhatsApp messaging
+│   │   └── doctor_verifier.py            # Doctor verification
+│   ├── 📁 storage/                       # Data persistence
+│   │   └── json_storage.py               # JSON file storage
+│   ├── 📁 models/                        # Data models
+│   │   ├── patient.py                    # Patient record model
+│   │   ├── grievance.py                  # Grievance report model
+│   │   └── message.py                    # Message model
+│   ├── 📁 utils/                         # Utilities
+│   │   ├── config.py                     # Configuration management
+│   │   ├── logger.py                     # Structured logging
+│   │   └── validators.py                 # Data validation
+│   └── __init__.py                       # Package initialization
+├── 📁 config/                            # Configuration files
+│   ├── settings.yaml                     # Application settings
+│   └── auditor.prompt                    # LLM instructions
+├── 📁 data/                              # Data directories
+│   ├── raw/                              # Input data
+│   └── processed/                        # Output data
+├── 📁 scripts/                           # Entry points
+│   └── run_pipeline.py                   # Main script
+├── 📄 requirements.txt                    # Dependencies
+├── 📄 requirements-dev.txt                # Development dependencies
+├── 📄 setup.py                           # Package setup
+├── 📄 Makefile                           # Common commands
+└── 📄 .gitignore                         # Git ignore rules
+```
 
 ---
 
@@ -22,7 +67,7 @@ Mock EHR agent demo: corrupt a clean dataset, then use an auditor (Gemini) to fi
 
 ---
 
-## 1. Set up the environment
+## 1. Set up environment
 
 Create a virtual environment in project folder:
 
@@ -60,6 +105,10 @@ When active, your prompt will show `(venv)`.
 ## 3. Install dependencies
 
 ```bash
+# Install package in development mode
+pip install -e .
+
+# Or install dependencies directly
 pip install -r requirements.txt
 ```
 
@@ -67,7 +116,7 @@ pip install -r requirements.txt
 
 ## 4. Set up API keys
 
-Create a `.env` file in the project root:
+Create a `.env` file in project root:
 
 ```bash
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -80,59 +129,39 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ### **Option 1: Full Pipeline (Demo Mode)**
 ```bash
 # Run full pipeline with 5 records (demo)
-python3 pipeline.py --demo 5
+make demo
+# OR
+python scripts/run_pipeline.py --demo 5
 
 # Run full pipeline with all records
-python3 pipeline.py
+python scripts/run_pipeline.py
 ```
 
-### **Option 2: JSON-Only Auditor (Recommended)**
-```bash
-# Generate JSON grievance reports (no CSV truncation)
-python3 run_auditor_json_complete.py --demo 5
-
-# Then run verification
-python3 pipeline.py --step verify
-```
-
-### **Option 3: Individual Steps**
+### **Option 2: Individual Steps**
 ```bash
 # Step 1: Audit only
-python3 pipeline.py --step audit --demo 5
+make audit
+# OR
+python scripts/run_pipeline.py --step audit --demo 5
 
 # Step 2: Verify only
-python3 pipeline.py --step verify
+make verify
+# OR
+python scripts/run_pipeline.py --step verify
 
 # Step 3: Resolve only  
-python3 pipeline.py --step resolve
+make resolve
+# OR
+python scripts/run_pipeline.py --step resolve --demo 5
 ```
 
----
+### **Option 3: Legacy Scripts**
+```bash
+# Use original auditor (JSON output)
+python3 run_auditor_json_complete.py --demo 5
 
-## 📁 **Project Structure**
-
-```
-SelfCritiqueAuthor/
-├── 📄 Core Scripts
-│   ├── pipeline.py                 # Main orchestrator
-│   ├── run_auditor_json_complete.py # JSON auditor (NEW)
-│   ├── whatsapp_verifier.py        # WhatsApp system
-│   ├── doctor_verifier.py          # Doctor verification
-│   └── resolver.py                 # Data correction
-│
-├── 📁 Data Storage
-│   ├── grievance_reports/          # JSON grievance files (NEW)
-│   ├── whatsapp_messages/          # Message/response files (NEW)
-│   ├── ehr_messy.json             # Input data
-│   └── ehr_corrected.json         # Cleaned output
-│
-├── 📄 Configuration
-│   ├── auditor.prompt              # LLM instructions
-│   ├── requirements.txt            # Dependencies
-│   └── .env                       # API keys
-│
-└── 📄 Documentation
-    └── README.md                   # This file
+# Use original pipeline
+python3 pipeline.py --demo 5
 ```
 
 ---
@@ -166,20 +195,23 @@ SelfCritiqueAuthor/
 - **5-Second Delays**: Faster API retry logic
 
 ### **📱 WhatsApp Verification**
-- **Message Storage**: All messages saved to `whatsapp_messages/`
+- **Message Storage**: All messages saved to `data/processed/messages/`
 - **Response Tracking**: Patient responses recorded in separate fields
 - **Issue Display**: Shows specific inconsistencies instead of counts
 - **Professional Format**: Healthcare-appropriate messaging
 
-### **📧 Doctor Verification**
-- **Clinical Review**: Automatic email to healthcare providers
-- **HIPAA Compliant**: Privacy-focused verification process
-- **Status Tracking**: Confirmation/Correction workflow
-
-### **🔧 Data Resolution**
+### **📧 Data Resolution**
 - **Auto-Correction**: Fixes identified inconsistencies
 - **Preservation**: Maintains original data integrity
 - **Validation**: Ensures corrected data consistency
+
+### **🏗️ Production Architecture**
+- **Modular Design**: Clear separation of concerns
+- **Configuration-Driven**: YAML-based settings with environment overrides
+- **Type Safety**: Pydantic models with full type hints
+- **Structured Logging**: JSON logs with context tracking
+- **Extensible**: Easy to add new verifiers, storage, or processors
+- **Testable**: pytest framework ready
 
 ---
 
@@ -232,22 +264,50 @@ SelfCritiqueAuthor/
 
 ### **Pipeline Arguments**
 ```bash
-python3 pipeline.py [OPTIONS]
+python scripts/run_pipeline.py [OPTIONS]
 
 Options:
   --demo N           Run with N records only (default: 0 = all)
   --step STEP        Run specific step: audit|verify|resolve
   --no-verification  Skip verification step
   --output DIR       Custom output directory
+  --config FILE       Custom configuration file
+  --log-level LEVEL   Logging level (DEBUG|INFO|WARNING|ERROR)
+  --verbose          Enable verbose logging
 ```
 
-### **Auditor Arguments**
-```bash
-python3 run_auditor_json_complete.py [OPTIONS]
+### **YAML Configuration**
+```yaml
+# config/settings.yaml
+app:
+  name: "Self-Critique Author"
+  version: "2.0.0"
+  debug: false
 
-Options:
-  --demo N           Run with N records only
-  --output DIR       Custom grievance output directory
+llm:
+  provider: "gemini"
+  model: "gemini-1.5-flash"
+  max_retries: 3
+  delay_seconds: 5
+
+storage:
+  default_format: "json"
+  output_directory: "data/processed"
+  grievance_directory: "data/processed/grievances"
+  message_directory: "data/processed/messages"
+
+verification:
+  whatsapp:
+    enabled: true
+    message_format: "professional"
+  doctor:
+    enabled: true
+    email_template: "clinical_verification"
+
+logging:
+  level: "INFO"
+  format: "structured"
+  file: "logs/app.log"
 ```
 
 ---
@@ -261,29 +321,39 @@ Options:
 | **Storage Format** | CSV (limited) | JSON (structured) |
 | **Message Tracking** | Console only | Files + Console |
 | **Python Support** | 3.10+ | 3.8+ compatible |
+| **Architecture** | Monolithic | Modular & Extensible |
 
 ---
 
-## 🧪 **Testing & Debugging**
+## 🧪 **Testing & Development**
 
-### **Test WhatsApp Messages**
+### **Development Setup**
 ```bash
-python3 whatsapp_verifier.py
+# Setup development environment
+make dev-setup
+
+# Run tests
+make test
+
+# Code quality checks
+make lint
+make format
+
+# Clean build artifacts
+make clean
 ```
 
-### **Debug Grievance Parsing**
+### **Available Commands**
 ```bash
-python3 debug_parsing.py
-```
-
-### **Test Message Formatting**
-```bash
-python3 test_message.py
-```
-
-### **Convert Existing CSV to JSON**
-```bash
-python3 convert_to_json_files.py
+make help           # Show all available commands
+make demo           # Run pipeline in demo mode (5 records)
+make audit          # Run audit step only
+make verify         # Run verification step only
+make resolve        # Run resolution step only
+make test           # Run all tests
+make lint           # Run linting checks
+make format         # Format code with black and isort
+make clean          # Clean temporary files
 ```
 
 ---
@@ -296,20 +366,67 @@ python3 convert_to_json_files.py
 - **Solution**: Use Python 3.9 compatible version (already fixed)
 
 **❌ "Grievance reports are truncated"**
-- **Solution**: Use `run_auditor_json_complete.py` instead of CSV
+- **Solution**: Use `run_auditor_json_complete.py` or new modular system
 
 **❌ "No WhatsApp messages found"**
-- **Solution**: Check `whatsapp_messages/` directory after running verification
+- **Solution**: Check `data/processed/messages/` directory after running verification
 
 **❌ "API key not found"**
 - **Solution**: Set `GEMINI_API_KEY` in `.env` file
 
+**❌ "Module not found"**
+- **Solution**: Install package in development mode: `pip install -e .`
+
 ### **Getting Help**
 
-1. Check the console output for detailed error messages
+1. Check the structured logs in `logs/app.log`
 2. Verify all prerequisites are met
 3. Ensure API keys are properly configured
 4. Check file permissions for output directories
+5. Use `--verbose` flag for detailed debugging
+
+---
+
+## 🚀 **Extending the System**
+
+### **Adding a New Verifier**
+```python
+# src/self_critique_author/verification/email_verifier.py
+from ..core.interfaces import VerifierInterface
+from ..models.message import VerificationMessage
+
+class EmailVerifier(VerifierInterface):
+    def send_verification(self, grievance):
+        # Implementation
+        pass
+```
+
+### **Adding New Storage**
+```python
+# src/self_critique_author/storage/database_storage.py
+from ..core.interfaces import StorageInterface
+from ..models.grievance import GrievanceReport
+
+class DatabaseStorage(StorageInterface):
+    def save_grievance(self, grievance: GrievanceReport) -> str:
+        # Database implementation
+        pass
+```
+
+### **Configuration for New Components**
+```yaml
+# config/settings.yaml
+verification:
+  email:
+    enabled: true
+    smtp_server: "smtp.example.com"
+    template: "verification_email"
+
+storage:
+  database:
+    enabled: true
+    connection_string: "postgresql://..."
+```
 
 ---
 
@@ -318,30 +435,37 @@ python3 convert_to_json_files.py
 ### **Environment Setup**
 ```bash
 # Production environment
-export PYTHONPATH=/path/to/SelfCritiqueAuthor
+export APP_ENV=production
+export LOG_LEVEL=INFO
+export STORAGE_TYPE=database
+export VERIFICATION_WHATSAPP_ENABLED=false
 export GEMINI_API_KEY=your_production_key
-export WHATSAPP_API_KEY=your_whatsapp_key
 ```
 
-### **Batch Processing**
+### **Docker Support**
 ```bash
-# Process large datasets
-python3 pipeline.py --batch-size 100 --parallel 4
+# Build and run with Docker
+make docker-build
+make docker-run
 ```
 
 ### **Monitoring**
-- Monitor `grievance_reports/` for audit results
-- Check `whatsapp_messages/` for communication logs
-- Track `ehr_corrected.json` for final output
+- Monitor `data/processed/grievances/` for audit results
+- Check `data/processed/messages/` for communication logs
+- Track `data/processed/ehr_corrected.json` for final output
+- Review structured logs in `logs/app.log`
 
 ---
 
-## 🤝 **Contributing**
+## 🤝 **Contributing Guidelines**
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Make changes and test thoroughly
-4. Submit pull request with description
+1. **Follow existing code structure** and module boundaries
+2. **Add tests for new features** using pytest framework
+3. **Update documentation** and configuration examples
+4. **Use type hints** and Pydantic models
+5. **Follow PEP 8 style guide**
+6. **Add configuration options** for new features in YAML
+7. **Test with `make test`** before submitting
 
 ---
 
@@ -354,12 +478,13 @@ This project is for demonstration purposes. Please ensure compliance with health
 ## 📞 **Support**
 
 For questions or issues:
-- Check the troubleshooting section above
-- Review console output for detailed error messages
+- Check troubleshooting section above
+- Review structured logs in `logs/app.log`
 - Verify API key configuration and network connectivity
+- Check Makefile commands for common tasks
 
 ---
 
 **🎉 Happy Auditing!** 
 
-*Version 2.0 - Complete JSON grievance storage with WhatsApp message tracking*
+*Version 2.0 - Production-ready modular architecture with complete JSON grievance storage and WhatsApp message tracking*

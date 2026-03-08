@@ -306,6 +306,61 @@ Your privacy is our priority. No information will be shared without your consent
         
         return details
     
+    def send_verification_messages_json(self, grievance_data_list: list) -> list:
+        """
+        Send WhatsApp messages for all inconsistent records from JSON grievance data.
+        """
+        messages = []
+        
+        for grievance_data in grievance_data_list:
+            patient_info = grievance_data.get('patient_info', {})
+            audit_results = grievance_data.get('audit_results', {})
+            
+            patient_id = patient_info.get('Patient_ID', '')
+            phone = patient_info.get('cell_number', '')
+            
+            if not phone:
+                print(f"⚠️ No phone number for Patient {patient_id}, skipping WhatsApp verification")
+                continue
+            
+            grievance_report = audit_results.get('grievance_report', '')
+            grievance_type = self.categorize_grievance(grievance_report)
+            grievance_details = self.extract_grievance_details(grievance_report)
+            
+            # Format message based on type
+            if grievance_type == GrievanceType.USER_DATA:
+                message_text = self._format_user_data_message(grievance_details, patient_info)
+                options = ['YES', 'NO', 'DETAILS']
+            else:
+                message_text = self._format_clinical_data_message(grievance_details, patient_info)
+                options = ['CONFIRM', 'DECLINE', 'DETAILS']
+            
+            # Create message object
+            message = WhatsAppMessage(
+                patient_id=patient_id,
+                phone_number=phone,
+                message=message_text,
+                grievance_type=grievance_type,
+                options=options,
+                grievance_details=grievance_details
+            )
+            
+            # Send message
+            grievance_data_for_message = {
+                'type': grievance_type.value,
+                'patient_info': patient_info,
+                'grievance_details': grievance_details
+            }
+            
+            if self._send_whatsapp_message(phone, message_text, patient_id, grievance_data_for_message):
+                messages.append(message)
+                self.sent_messages.append(message)
+                print(f"✅ Message sent to Patient {patient_id}")
+            else:
+                print(f"❌ Failed to send message to Patient {patient_id}")
+        
+        return messages
+    
     def send_verification_messages(self, audit_csv_path: Union[str, Path]) -> List[WhatsAppMessage]:
         """
         Send WhatsApp messages for all inconsistent records.
